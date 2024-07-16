@@ -1,0 +1,34 @@
+function Get-AccessTokenAsManagedIdentity {
+    # version 2.2
+    param (
+        [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()]
+        [String]$Resource,
+        [Parameter(Mandatory = $false)][ValidateNotNullOrEmpty()]
+        [String]$UAMIClientId
+    )
+    try {
+        $URI = $env:IDENTITY_ENDPOINT + "?resource=$($Resource)&api-version=2019-08-01"
+        if ($UAMIClientId) {
+            $URI = $URI + "&client_id=$($UAMIClientId)"
+        }
+        $Response = Invoke-RestMethod -Method "GET" -Headers @{"X-IDENTITY-HEADER" = "$env:IDENTITY_HEADER"} -Uri $URI
+        return $Response
+    }
+    catch {
+        Write-Error -Message $.Exception
+        throw $_.Exception
+    }
+}
+
+$AccessToken = (Get-AccessToken -Resource "https://graph.microsoft.com/").access_token
+
+<# resource examples
+
+$AccessToken = (Get-AccessToken -Resource "https://graph.microsoft.com/").access_token # Graph API
+$AccessToken = (Get-AccessToken -Resource "https://api.loganalytics.io/").access_token # Log Analytics API
+$AccessToken = (Get-AccessToken -Resource "https://management.azure.com/").access_token # Azure REST API
+$AccessToken = (Get-AccessToken -Resource "https://storage.azure.com/").access_token # Azure Storage API
+$AccessToken = (Get-AccessToken -Resource "https://vault.azure.net/").access_token # Azure Key Vault API
+$AccessToken = (Get-AccessToken -Resource "https://management.azure.net/").access_token # Azure management API - with API version
+
+#>
