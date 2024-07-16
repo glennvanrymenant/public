@@ -26,7 +26,6 @@ $AccessToken = (Get-AccessToken -Resource "https://graph.microsoft.com/").access
 
 $AccessToken = (Get-AccessToken -Resource "https://graph.microsoft.com/").access_token # Graph API
 $AccessToken = (Get-AccessToken -Resource "https://api.loganalytics.io/").access_token # Log Analytics API
-$AccessToken = (Get-AccessToken -Resource "https://management.azure.com/").access_token # Azure REST API
 $AccessToken = (Get-AccessToken -Resource "https://storage.azure.com/").access_token # Azure Storage API
 $AccessToken = (Get-AccessToken -Resource "https://vault.azure.net/").access_token # Azure Key Vault API
 $AccessToken = (Get-AccessToken -Resource "https://management.azure.net/").access_token # Azure management API - with API version
