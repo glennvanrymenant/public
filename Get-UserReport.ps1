@@ -419,7 +419,7 @@ foreach ($User in $FilteredUsers) {
         CompanyName                                 = $User.companyName
         CreatedDateTime                             = if ($User.createdDateTime) {$User.createdDateTime.ToString("yyyy-MM-dd HH:mm:ss")} else {"NA"}
         LastPasswordChangeDateTime                  = if ($User.LastPasswordChangeDateTime) {$User.LastPasswordChangeDateTime.ToString("yyyy-MM-dd HH:mm:ss")} else {"NA"}
-        PasswordAgeInDays                           = if ($User.LastPasswordChangeDateTime) {([math]::Round((Get-Date - $User.LastPasswordChangeDateTime).TotalDays,0))} else {"NA"}
+        PasswordAgeInDays                           = if ($User.LastPasswordChangeDateTime) {(New-TimeSpan -Start ($User.LastPasswordChangeDateTime) -End (Get-Date)).Days} else {"NA"} 
         SignInSessionsValidFromDateTime             = if ($User.signInSessionsValidFromDateTime) {$User.signInSessionsValidFromDateTime.ToString("yyyy-MM-dd HH:mm:ss")} else {"NA"}
         RefreshTokensValidFromDateTime              = if ($User.refreshTokensValidFromDateTime) {$User.refreshTokensValidFromDateTime.ToString("yyyy-MM-dd HH:mm:ss")} else {"NA"}
         LastSignInRequestId                         = "NA"
@@ -473,7 +473,7 @@ foreach ($User in $FilteredUsers) {
 
     if ($AvailableUserExtensionProperties.count -ge 1) {
         foreach ($AvailableUserExtensionProperty in $AvailableUserExtensionProperties) {
-            $ExportObject | Add-Member -NotePropertyName $($AvailableUserExtensionProperty.name) -NotePropertyValue $User.($($AvailableUserExtensionProperty.name))
+            $ExportObject | Add-Member -NotePropertyName $($AvailableUserExtensionProperty.name) -NotePropertyValue "$User.($($AvailableUserExtensionProperty.name))"
         }
     }
 
