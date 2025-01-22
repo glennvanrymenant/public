@@ -1,5 +1,5 @@
 Function Invoke-MgGraphAPI {
-    # version 2.8
+    # version 3.0
     # https://learn.microsoft.com/en-us/powershell/microsoftgraph/authentication-commands?view=graph-powershell-1.0#using-invoke-mggraphrequest
     param (
         [Parameter(Mandatory = $false)][ValidateNotNullOrEmpty()]
@@ -11,41 +11,33 @@ Function Invoke-MgGraphAPI {
         [Parameter(Mandatory = $false)]
         [switch]$Beta
     )
-
     # If the -Beta switch is used, set the API version to beta
     $APIVersion = if ($PSBoundParameters.ContainsKey('Beta')) { "beta" } else { "v1.0" }
-
     # Check if the endpoint already contains the API version
     $URI = if ($Endpoint -match "/v1.0/" -or $Endpoint -match "/beta/") {
         "https://graph.microsoft.com$Endpoint"
     } else {
         # Generalize to adapt any endpoint
-        if ($Endpoint -match "^v1.0/") {
+        if ($Endpoint -match "^v1.0/" -or $Endpoint -match "^beta/") {
             "https://graph.microsoft.com/$Endpoint"
         } elseif ($Endpoint -match "^/") {
-            "https://graph.microsoft.com/v1.0$Endpoint"
+            "https://graph.microsoft.com/$APIVersion$Endpoint"
         } else {
-            "https://graph.microsoft.com/v1.0/$Endpoint"
+            "https://graph.microsoft.com/$APIVersion/$Endpoint"
         }
     }
-
     # Create an empty list to store the data
     $Data = [System.Collections.Generic.List[Object]]@()
-
     # Set the maximum number of attempts
     $MaxAttempts = 5
-
     # Set the initial number of attempts 
     $Attempts = 1
-
     # Set the initial value of the success flag to false
     $Success = $false
-
     # If the method parameter is not specified, set the method to GET
     if (-not $Method) {
         $Method = "GET"
     }
-
     while ($Attempts -le $MaxAttempts -and -not $Success) {
         try {
             switch ($Method) {
@@ -113,12 +105,15 @@ Function Invoke-MgGraphAPI {
             else {
                 Write-Host -ForegroundColor Red "StatusCode: $($_.Exception.Response.StatusCode)"
                 Write-Host -ForegroundColor Red "Exception message: $($_.Exception.Message)"
+                $ErrorMessage = $Error[0].ErrorDetails.Message.ToString()
+                if ($ErrorMessage -match '{.*}$') {
+                    $ErrorMessageDetail = ($Matches[0] | ConvertFrom-Json).Error.Message
+                    Write-Host -ForegroundColor Red "Error message: $($ErrorMessageDetail)"
+                }
                 # Exit the loop if the exception is not due to throttling
                 $Success = $true
             }
         }
     }
-
     return $Data
-
 }
